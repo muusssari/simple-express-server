@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Helper function to generate random IDs
 function generateRandomIds(requestedAmount) {
-    const numberOfIds = Math.max(1, Math.floor(requestedAmount / 4)); // Ensure at least 1 ID
+    const numberOfIds = Math.max(1, Math.floor(requestedAmount / 10)); // Ensure at least 1 ID
     const ids = [];
 
     for (let i = 0; i < numberOfIds; i++) {
@@ -23,6 +23,14 @@ function generateRandomIds(requestedAmount) {
     return ids;
 }
 
+const testData = 
+{
+    "maxScore": 0.99,
+    "numHits": 3,
+    "numTargets": 1,
+    "hits": [],
+    "targets": {}
+}
 
 // Endpoint to return a JSON object with fake IDs
 app.post("/api/ids", (req, res) => {
@@ -36,10 +44,14 @@ app.post("/api/ids", (req, res) => {
         const data = {
             ids: generateRandomIds(requestedAmount),
         };
-        res.json(data);
+        testData.hits = data.ids.map(x => ({id: x, keyword: "test", match: "test", score: 0.98}))
+        
+        data.ids.map(x => testData.targets[x] = {url: `http://localhost:${port}/api/download/?id=${x}`, source: "trustme", details: []})
+        res.json(testData);
     }, timeoutDuration);
-    //res.json(req.body)
 });
+
+
 
 // Endpoint to return a PDF with ID and type provided as query parameters
 app.get("/api/download", (req, res) => {
